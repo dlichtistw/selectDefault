@@ -3,6 +3,10 @@
 #include <type_traits>
 #include <utility>
 
+// Copyright David Lichti 2022.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+
 namespace select_n
 {
   namespace detail_n
@@ -86,8 +90,10 @@ namespace select_n
     {
       // Key exists -> return value.
       if constexpr ( std::is_same_v< MAP, std::remove_reference_t< MAP > > )
+        // Temporary map -> move entry.
         return std::move( *existing );
       else
+        // Persistent map -> copy or reference entry.
         return *existing;
     }
     else
@@ -107,6 +113,7 @@ namespace select_n
   template< typename MAP, typename KEY >
   decltype( auto ) select_default( MAP &&map, KEY &&key )
   {
+    // Add the static default value and forward the arguments.
     return select_default( std::forward< MAP >( map ), std::forward< KEY >( key ), detail_n::static_default< detail_n::select_map_value_t< MAP, KEY > >() );
   }
 }
