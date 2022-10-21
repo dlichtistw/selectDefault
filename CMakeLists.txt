@@ -5,9 +5,6 @@ include(doxygen.cmake)
 
 set(CMAKE_CXX_STANDARD 20)
 
-include(CTest)
-enable_testing()
-
 include_directories(src)
 
 add_subdirectory(test)
