@@ -76,15 +76,20 @@ namespace select_n
 
     If \c map returns an entry for \c key , it is returned. Otherwise, \c def is returned as default.
     The result is returned as reference if both \c map and \c def are references, adding a const if any of \c map or \c def is const.
-    If \c map or \c def are moved in (i.e. passed as rvalue), then the function returns by value.
+    If \c map or \c def are moved in (i.e. passed as rvalue), and the result is taken from the rvalue input, then the result is moved out.
   */
   template< typename DEFAULT, typename MAP, typename KEY >
   detail_n::select_map_default_t< MAP, KEY, DEFAULT >
   select_default( MAP &&map, KEY &&key, DEFAULT &&def )
   {
     if ( auto existing{ select( map, std::forward< KEY >( key ) ) } )
+    {
       // Key exists -> return value.
-      return *existing;
+      if constexpr ( std::is_same_v< MAP, std::remove_reference_t< MAP > > )
+        return std::move( *existing );
+      else
+        return *existing;
+    }
     else
       // Key missing -> return the default value.
       return std::forward< DEFAULT >( def );
