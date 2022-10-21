@@ -16,6 +16,9 @@ add_executable(select_default_test select_default_test.cpp)
 target_link_libraries(select_default_test test_util)
 add_test(select_default_test select_default_test)
 
+add_executable(research research.cpp)
+target_link_libraries(research test_util)
+
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
