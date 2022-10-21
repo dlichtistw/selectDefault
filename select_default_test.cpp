@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <utility>
 
 using namespace select_n;
 using test_n::Tracer;
@@ -20,6 +21,8 @@ namespace
     auto &existing{ select_default( map, entry_t::EXISTING ) };
     auto &missing{ select_default( map, entry_t::MISSING ) };
 
+    std::cout << Tracer::log() << std::endl;
+
     assert( ( std::is_same_v< decltype( existing ), const Tracer & > ) );
     assert( &existing == &map.at( entry_t::EXISTING ) );
     assert( &missing == &def );
@@ -35,6 +38,8 @@ namespace
     auto &existing{ select_default( map, entry_t::EXISTING ) };
     auto &missing{ select_default( map, entry_t::MISSING ) };
 
+    std::cout << Tracer::log() << std::endl;
+
     assert( ( std::is_same_v< decltype( existing ), const Tracer & > ) );
     assert( &existing == &map.at( entry_t::EXISTING ) );
     assert( &missing == &def );
@@ -43,19 +48,16 @@ namespace
 
   void testSelectImplicitDefaultFromTemporaryMap()
   {
-    const auto &def{ detail_n::static_default< Tracer >() };
+    auto map{ test_n::make_test_map() };
     Tracer::clear_log();
 
-    auto existing{ select_default( test_n::make_test_map(), entry_t::EXISTING ) };
-    auto missing{ select_default( test_n::make_test_map(), entry_t::MISSING ) };
+    auto existing{ select_default( std::move( map ), entry_t::EXISTING ) };
+
+    std::cout << Tracer::log() << std::endl;
 
     assert( ( std::is_same_v< decltype( existing ), Tracer > ) );
-    assert( missing == def );
-    assert( Tracer::log().size() == 4 );
-    assert( ( Tracer::log( 0 ) == Tracer::log_entry_t{ Tracer::operation::COPY_CONSTRUCTION, existing.id() } ) );
-    assert( ( Tracer::log( 1 ) == Tracer::log_entry_t{ Tracer::operation::DESTRUCTION, existing.id() } ) );
-    assert( ( Tracer::log( 2 ) == Tracer::log_entry_t{ Tracer::operation::COPY_CONSTRUCTION, def.id() } ) );
-    assert( Tracer::log( 3 ).first == Tracer::operation::DESTRUCTION );
+    assert( existing == map.at( entry_t::EXISTING ) );
+    assert( ( Tracer::log() == std::vector{ Tracer::log_entry_t{ Tracer::operation::MOVE_CONSTRUCTION, existing.id() } } ) );
   }
 
   void testSelectExplicitDefaultFromConstantMap()
@@ -66,6 +68,8 @@ namespace
 
     auto &existing{ select_n::select_default( map, entry_t::EXISTING, def ) };
     auto &missing{ select_n::select_default( map, entry_t::MISSING, def ) };
+
+    std::cout << Tracer::log() << std::endl;
 
     assert( ( std::is_same_v< decltype( existing ), const Tracer & > ) );
     assert( &existing == &map.at( entry_t::EXISTING ) );
@@ -82,6 +86,8 @@ namespace
     auto &existing{ select_n::select_default( map, entry_t::EXISTING, def ) };
     auto &missing{ select_n::select_default( map, entry_t::MISSING, def ) };
 
+    std::cout << Tracer::log() << std::endl;
+
     assert( ( std::is_same_v< decltype( existing ), Tracer & > ) );
     assert( &existing == &map.at( entry_t::EXISTING ) );
     assert( &missing == &def );
@@ -90,19 +96,32 @@ namespace
 
   void testSelectExplicitDefaultFromTemporaryMap()
   {
-    const auto &def{ detail_n::static_default< Tracer >() };
+    auto map{ test_n::make_test_map() };
+    auto def{ test_n::make_test_tracer() };
     Tracer::clear_log();
 
-    auto existing{ select_default( test_n::make_test_map(), entry_t::EXISTING, def ) };
-    auto missing{ select_default( test_n::make_test_map(), entry_t::MISSING, def ) };
+    auto existing{ select_default( std::move( map ), entry_t::EXISTING, def ) };
+
+    std::cout << Tracer::log() << std::endl;
 
     assert( ( std::is_same_v< decltype( existing ), Tracer > ) );
+    assert( existing == map.at( entry_t::EXISTING ) );
+    assert( ( Tracer::log() == std::vector{ Tracer::log_entry_t{ Tracer::operation::MOVE_CONSTRUCTION, existing.id() } } ) );
+  }
+
+  void testSelectExplicitDefaultFromTemporaryDefault()
+  {
+    auto map{ test_n::make_test_map() };
+    auto def{ test_n::make_test_tracer() };
+    Tracer::clear_log();
+
+    auto missing{ select_default( map, entry_t::MISSING, std::move( def ) ) };
+
+    std::cout << Tracer::log() << std::endl;
+
+    assert( ( std::is_same_v< decltype( missing ), Tracer > ) );
     assert( missing == def );
-    assert( Tracer::log().size() == 4 );
-    assert( ( Tracer::log( 0 ) == Tracer::log_entry_t{ Tracer::operation::COPY_CONSTRUCTION, existing.id() } ) );
-    assert( ( Tracer::log( 1 ) == Tracer::log_entry_t{ Tracer::operation::DESTRUCTION, existing.id() } ) );
-    assert( ( Tracer::log( 2 ) == Tracer::log_entry_t{ Tracer::operation::COPY_CONSTRUCTION, def.id() } ) );
-    assert( Tracer::log( 3 ).first == Tracer::operation::DESTRUCTION );
+    assert( ( Tracer::log() == std::vector{ Tracer::log_entry_t{ Tracer::operation::MOVE_CONSTRUCTION, def.id() } } ) );
   }
 }
 
@@ -115,4 +134,5 @@ int main()
   testSelectExplicitDefaultFromConstantMap();
   testSelectExplicitDefaultFromMutableMap();
   testSelectExplicitDefaultFromTemporaryMap();
+  testSelectExplicitDefaultFromTemporaryDefault();
 }
