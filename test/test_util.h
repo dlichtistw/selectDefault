@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vector>
 #include <map>
 #include <ostream>
+#include <vector>
 
 namespace select_n::test_n
 {

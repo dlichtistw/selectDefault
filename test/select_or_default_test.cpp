@@ -1,9 +1,8 @@
-#include "select_or_default.h"
-#include "test_util.h"
-
 #include <cassert>
 #include <iostream>
-#include <utility>
+
+#include "select_or_default.h"
+#include "test_util.h"
 
 using namespace select_n;
 using test_n::Tracer;

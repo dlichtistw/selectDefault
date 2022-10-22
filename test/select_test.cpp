@@ -1,7 +1,7 @@
+#include <cassert>
+
 #include "select.h"
 #include "test_util.h"
-
-#include <cassert>
 
 using namespace select_n;
 
