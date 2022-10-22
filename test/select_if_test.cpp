@@ -7,14 +7,7 @@ using namespace select_n;
 
 namespace
 {
-  using entry_t = test_n::test_map_entry;
   using test_n::Tracer;
-
-  std::vector< Tracer > make_test_vector()
-  {
-    Tracer::Silencer silencer;
-    return { {} };
-  }
 
   template< auto c >
   struct constant_function
@@ -25,7 +18,7 @@ namespace
 
   void testSelectFromConstantVector()
   {
-    const auto vec{ make_test_vector() };
+    const auto vec{ test_n::make_test_vector() };
     Tracer::clear_log();
 
     auto existing{ select_if( vec, constant_function< true >{} ) };
@@ -39,7 +32,7 @@ namespace
 
   void testSelectFromMutableVector()
   {
-    auto vec{ make_test_vector() };
+    auto vec{ test_n::make_test_vector() };
     Tracer::clear_log();
 
     auto existing{ select_if( vec, constant_function< true >{} ) };

@@ -1,4 +1,5 @@
 #include "test_util.h"
+#include <compare>
 
 using namespace select_n::test_n;
 
@@ -38,8 +39,13 @@ Tracer::~Tracer() noexcept
   record( operation::DESTRUCTION );
 }
 
-bool select_n::test_n::operator==( const Tracer &a, const Tracer &b ) noexcept { return a._id == b._id; }
-bool select_n::test_n::operator!=( const Tracer &a, const Tracer &b ) noexcept { return !( a == b ); }
+std::strong_ordering select_n::test_n::operator<=>( const Tracer &a, const Tracer &b ) noexcept { return a._id <=> b._id; }
+
+bool select_n::test_n::operator==( const Tracer &, const Tracer & ) noexcept = default;
+bool select_n::test_n::operator!=( const Tracer &, const Tracer & ) noexcept = default;
+
+bool select_n::test_n::operator<( const Tracer &, const Tracer & ) noexcept = default;
+bool select_n::test_n::operator>( const Tracer &, const Tracer & ) noexcept = default;
 
 std::ostream &select_n::test_n::operator<<( std::ostream &stream, const Tracer &tracer ) { return stream << "Tracer." << tracer._id; }
 
@@ -63,18 +69,28 @@ Tracer::log_t Tracer::_log{};
 Tracer::Silencer::Silencer() noexcept { record_log = false; }
 Tracer::Silencer::~Silencer() noexcept { record_log = true; }
 
-select_n::test_n::Tracer
-select_n::test_n::make_test_tracer() noexcept
+Tracer select_n::test_n::make_test_tracer() noexcept
 {
   Tracer::Silencer silencer;
   return {};
 }
 
-select_n::test_n::testMap_t
-select_n::test_n::make_test_map() noexcept
+testMap_t select_n::test_n::make_test_map() noexcept
 {
   Tracer::Silencer silencer;
   return { { test_map_entry::EXISTING, {} } };
+}
+
+testSet_t select_n::test_n::make_test_set() noexcept
+{
+  Tracer::Silencer silenver;
+  return { {} };
+}
+
+testVec_t select_n::test_n::make_test_vector() noexcept
+{
+  Tracer::Silencer silencer;
+  return { {} };
 }
 
 std::ostream &
