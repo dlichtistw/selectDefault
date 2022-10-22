@@ -4,10 +4,7 @@
 
 #pragma once
 
-#include <type_traits>
-
 #include "select.h"
-#include "select_util.h"
 
 namespace select_n
 {

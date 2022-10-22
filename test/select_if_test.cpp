@@ -1,9 +1,7 @@
+#include <cassert>
+
 #include "select_if.h"
 #include "test_util.h"
-
-#include <cassert>
-#include <vector>
-#include <type_traits>
 
 using namespace select_n;
 
@@ -18,11 +16,11 @@ namespace
     return { {} };
   }
 
-  template< bool b >
+  template< auto c >
   struct constant_function
   {
     template< typename... T >
-    bool operator()( T &&... ) noexcept { return b; }
+    auto operator()( T &&... ) const noexcept { return c; }
   };
 
   void testSelectFromConstantVector()

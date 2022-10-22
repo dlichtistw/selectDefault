@@ -1,5 +1,4 @@
 #include "test_util.h"
-#include <ostream>
 
 using namespace select_n::test_n;
 
