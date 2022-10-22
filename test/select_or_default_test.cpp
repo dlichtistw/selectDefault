@@ -1,4 +1,4 @@
-#include "select_default.h"
+#include "select_or_default.h"
 #include "test_util.h"
 
 #include <cassert>
@@ -18,8 +18,8 @@ namespace
     const auto &def{ detail_n::static_default< Tracer >() };
     Tracer::clear_log();
 
-    auto &existing{ select_default( map, entry_t::EXISTING ) };
-    auto &missing{ select_default( map, entry_t::MISSING ) };
+    auto &existing{ select_or_default( map, entry_t::EXISTING ) };
+    auto &missing{ select_or_default( map, entry_t::MISSING ) };
 
     std::cout << Tracer::log() << std::endl;
 
@@ -35,8 +35,8 @@ namespace
     const auto &def{ detail_n::static_default< Tracer >() };
     Tracer::clear_log();
 
-    auto &existing{ select_default( map, entry_t::EXISTING ) };
-    auto &missing{ select_default( map, entry_t::MISSING ) };
+    auto &existing{ select_or_default( map, entry_t::EXISTING ) };
+    auto &missing{ select_or_default( map, entry_t::MISSING ) };
 
     std::cout << Tracer::log() << std::endl;
 
@@ -51,7 +51,7 @@ namespace
     auto map{ test_n::make_test_map() };
     Tracer::clear_log();
 
-    auto existing{ select_default( std::move( map ), entry_t::EXISTING ) };
+    auto existing{ select_or_default( std::move( map ), entry_t::EXISTING ) };
 
     std::cout << Tracer::log() << std::endl;
 
@@ -66,8 +66,8 @@ namespace
     const auto def{ detail_n::static_default< Tracer >() };
     Tracer::clear_log();
 
-    auto &existing{ select_n::select_default( map, entry_t::EXISTING, def ) };
-    auto &missing{ select_n::select_default( map, entry_t::MISSING, def ) };
+    auto &existing{ select_n::select_or_default( map, entry_t::EXISTING, def ) };
+    auto &missing{ select_n::select_or_default( map, entry_t::MISSING, def ) };
 
     std::cout << Tracer::log() << std::endl;
 
@@ -83,8 +83,8 @@ namespace
     auto def{ detail_n::static_default< Tracer >() };
     Tracer::clear_log();
 
-    auto &existing{ select_n::select_default( map, entry_t::EXISTING, def ) };
-    auto &missing{ select_n::select_default( map, entry_t::MISSING, def ) };
+    auto &existing{ select_n::select_or_default( map, entry_t::EXISTING, def ) };
+    auto &missing{ select_n::select_or_default( map, entry_t::MISSING, def ) };
 
     std::cout << Tracer::log() << std::endl;
 
@@ -100,7 +100,7 @@ namespace
     auto def{ test_n::make_test_tracer() };
     Tracer::clear_log();
 
-    auto existing{ select_default( std::move( map ), entry_t::EXISTING, def ) };
+    auto existing{ select_or_default( std::move( map ), entry_t::EXISTING, def ) };
 
     std::cout << Tracer::log() << std::endl;
 
@@ -115,7 +115,7 @@ namespace
     auto def{ test_n::make_test_tracer() };
     Tracer::clear_log();
 
-    auto missing{ select_default( map, entry_t::MISSING, std::move( def ) ) };
+    auto missing{ select_or_default( map, entry_t::MISSING, std::move( def ) ) };
 
     std::cout << Tracer::log() << std::endl;
 

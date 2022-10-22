@@ -2,7 +2,7 @@
 #include <type_traits>
 
 #include "test_util.h"
-#include "select_default.h"
+#include "select.h"
 
 using namespace select_n;
 using test_n::Tracer;
@@ -14,26 +14,9 @@ namespace
 
 int main()
 {
-  auto map{ test_n::make_test_map() };
-  auto def{ test_n::make_test_tracer() };
+  std::cout << std::boolalpha;
 
-  {
-    auto existing{ select_default( map, entry_t::EXISTING, def ) };
-    std::cout << Tracer::log() << std::endl;
-  }
-  Tracer::clear_log();
-  {
-    auto existing{ select_default( std::move( map ), entry_t::EXISTING, def ) };
-    std::cout << Tracer::log() << std::endl;
-  }
-  Tracer::clear_log();
-  {
-    auto existing{ select_default( map, entry_t::MISSING, def ) };
-    std::cout << Tracer::log() << std::endl;
-  }
-  Tracer::clear_log();
-  {
-    auto existing{ select_default( map, entry_t::MISSING, std::move( def ) ) };
-    std::cout << Tracer::log() << std::endl;
-  }
+  const std::map< int, char > map{ { 1, 'a' } };
+
+  std::cout << std::is_same_v< decltype( ( map.find( 1 )->second ) ), const char & > << std::endl;
 }

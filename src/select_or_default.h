@@ -1,6 +1,9 @@
 #pragma once
 
+#include <type_traits>
+
 #include "select.h"
+#include "select_util.h"
 
 // Copyright David Lichti 2022.
 // Distributed under the Boost Software License, Version 1.0.
@@ -10,26 +13,29 @@ namespace select_n
 {
   namespace detail_n
   {
-    //! Define a suitable return type for \c select_default(map,key,def) . It is a reference if possible and const if necessary.
-    template< typename MAP, typename KEY, typename DEFAULT = const select_map_value_t< MAP, KEY > & >
-    using select_map_default_t = std::conditional_t< std::is_lvalue_reference_v< MAP > && std::is_lvalue_reference_v< DEFAULT >,
-                                                     conditional_const_t< is_consty_v< MAP > || is_consty_v< DEFAULT >, select_map_value_t< MAP, KEY> > &,
-                                                     select_map_value_t< MAP, KEY > >;
-
-    //! Provide a single, static default value for \c select_default(map,key,def) .
-    template< typename T >
-    const T &static_default()
+    //! Meta programming helper to deduce a suitable return type for \c select_or_default .
+    template< typename MAP, typename KEY, typename DEFAULT >
+    struct find_mapped_value_or_default_c
     {
-      if constexpr ( !std::is_same_v< T, std::decay_t< T > > )
-        // Do not distinguish on type modifiers.
-        return static_default< std::decay_t< T > >();
-      else
-      {
-        // The one and only default value of type T.
-        static const T def{};
-        return def;
-      }
-    }
+      //! Value type if taken from the map.
+      using mapped_value = find_mapped_value_t< MAP, KEY >;
+
+      //! Value type if falling back to the default.
+      using default_value = std::remove_reference_t< DEFAULT >;
+
+      //! If both sources are lvalue references, the result can be returned by lvalue reference, too.
+      static constexpr bool return_by_reference{ std::is_lvalue_reference_v< MAP > && std::is_lvalue_reference_v< DEFAULT > };
+
+      //! If any of the sources is const, the result has to be const, too.
+      static constexpr bool return_const{ std::is_const_v< mapped_value > || std::is_const_v< default_value > };
+
+      //! Final return type, deduced according to the rules above.
+      using type = std::conditional_t< return_by_reference, conditional_const_t< return_const, mapped_value > &, mapped_value >;
+    };
+
+    //! Deduce a suitable return type for \c select_or_default : reference if possible, const if necessary.
+    template< typename MAP, typename KEY, typename DEFAULT >
+    using find_mapped_value_or_default_t = typename find_mapped_value_or_default_c< MAP, KEY, DEFAULT >::type;
   }
 
   /*!
@@ -40,8 +46,8 @@ namespace select_n
     If \c map or \c def are moved in (i.e. passed as rvalue), and the result is taken from the rvalue input, then the result is moved out.
   */
   template< typename DEFAULT, typename MAP, typename KEY >
-  detail_n::select_map_default_t< MAP, KEY, DEFAULT >
-  select_default( MAP &&map, KEY &&key, DEFAULT &&def )
+  detail_n::find_mapped_value_or_default_t< MAP, KEY, DEFAULT >
+  select_or_default( MAP &&map, KEY &&key, DEFAULT &&def )
   {
     if ( auto existing{ select( map, std::forward< KEY >( key ) ) } )
     {
@@ -68,9 +74,9 @@ namespace select_n
           Hence, the result is always returned as a const reference if \c map is passed by reference.
   */
   template< typename MAP, typename KEY >
-  decltype( auto ) select_default( MAP &&map, KEY &&key )
+  decltype( auto ) select_or_default( MAP &&map, KEY &&key )
   {
     // Add the static default value and forward the arguments.
-    return select_default( std::forward< MAP >( map ), std::forward< KEY >( key ), detail_n::static_default< detail_n::select_map_value_t< MAP, KEY > >() );
+    return select_or_default( std::forward< MAP >( map ), std::forward< KEY >( key ), detail_n::static_default< detail_n::find_mapped_value_t< MAP, KEY > >() );
   }
 }
