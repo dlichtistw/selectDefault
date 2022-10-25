@@ -27,8 +27,17 @@ namespace select_n
       //! Deduced return value type for \c select_or_default . It already has the suitable const qualifier, but a reference may still be added.
       using return_value = conditional_const_t< return_const, found_value >;
 
+      //! Check that a default value reference can be converted into a return type reference.
+      static constexpr bool reference_convertible{ std::is_convertible_v< default_value &, return_value & > };
+
       //! If both sources are lvalue references, and conversion is possible, the result can be returned by lvalue reference, too.
-      static constexpr bool return_by_reference{ std::is_lvalue_reference_v< CONTAINER > && std::is_lvalue_reference_v< DEFAULT > };
+      static constexpr bool return_by_reference{ std::is_lvalue_reference_v< CONTAINER > && std::is_lvalue_reference_v< DEFAULT > && reference_convertible };
+
+      //! Check that a default value can be conveted into a return type.
+      static constexpr bool value_convertible{ std::is_convertible_v< default_value, return_value > };
+
+      // Friendly static assert to diagnose template failures.
+      static_assert( value_convertible || return_by_reference, "Cannot use DEFAULT for selecting from CONTAINER with KEY, since it is not convertible." );
 
       //! Final return type, deduced according to the rules above.
       using type = conditional_reference_t< return_by_reference, return_value >;
