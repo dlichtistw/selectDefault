@@ -1,7 +1,9 @@
 #pragma once
 
+#include <compare>
 #include <map>
 #include <ostream>
+#include <set>
 #include <vector>
 
 namespace select_n::test_n
@@ -18,8 +20,13 @@ namespace select_n::test_n
 
     ~Tracer() noexcept;
 
-    friend bool operator==( const Tracer &a, const Tracer &b ) noexcept;
-    friend bool operator!=( const Tracer &a, const Tracer &b ) noexcept;
+    friend std::strong_ordering operator<=>( const Tracer &a, const Tracer &b ) noexcept;
+
+    friend bool operator==( const Tracer &, const Tracer & ) noexcept;
+    friend bool operator!=( const Tracer &, const Tracer & ) noexcept;
+
+    friend bool operator<( const Tracer &, const Tracer & ) noexcept;
+    friend bool operator>( const Tracer &, const Tracer & ) noexcept;
 
     friend std::ostream &operator<<( std::ostream &stream, const Tracer &tracer );
 
@@ -70,6 +77,12 @@ namespace select_n::test_n
 
   using testMap_t = std::map< test_map_entry, Tracer >;
   testMap_t make_test_map() noexcept;
+
+  using testSet_t = std::set< Tracer >;
+  testSet_t make_test_set() noexcept;
+
+  using testVec_t = std::vector< Tracer >;
+  testVec_t make_test_vector() noexcept;
 
   std::ostream &operator<<( std::ostream &stream, const Tracer::operation operation );
 
